@@ -1,4 +1,4 @@
-import { createMachine } from "xstate";
+import { assign, createMachine } from "xstate";
 
 const StateHash = {
   not_started: "not_started",
@@ -30,10 +30,10 @@ const s = StateHash,
   c = ConditionHash,
   a = ActionHash;
 
-const machine = createMachine(
+export const gameMachine = createMachine(
   {
     id: "game",
-    initial: s.not_started,
+    initial: s.playing,
     context: {
       board: createInitialBoard(),
     },
@@ -96,9 +96,17 @@ const machine = createMachine(
       },
     },
     actions: {
-      [a.flipCard]: (context, event) => {
+      [a.flipCard]: assign((context, event) => {
         console.log(a.flipCard, { context, event });
-      },
+        const [rIdx, cIdx] = event.payload;
+        const newCard = { ...context.board[rIdx][cIdx], flipped: true };
+        const newBoard = dd(context.board);
+        newBoard[rIdx][cIdx] = newCard;
+        return {
+          ...context,
+          board: newBoard,
+        };
+      }),
     },
   }
 );
@@ -144,4 +152,8 @@ function chunkArray(array) {
     output.push(row);
   }
   return output;
+}
+
+function dd(o) {
+  return JSON.parse(JSON.stringify(o));
 }
