@@ -25,7 +25,8 @@ const ConditionHash = {
 
 const ActionHash = {
   flipCard: "flipCard",
-  unflipCards: "unflipCards!!!!",
+  unflipCards: "unflipCards",
+  createPair: "createPair",
 };
 
 const s = StateHash,
@@ -66,7 +67,11 @@ export const gameMachine = createMachine(
       },
       [s.two_cards_flipped]: {
         always: [
-          { target: s.match_found, cond: c.matchFound },
+          {
+            target: s.match_found,
+            actions: [a.createPair],
+            cond: c.matchFound,
+          },
           {
             target: s.no_match_found,
             cond: c.noMatchFound,
@@ -74,10 +79,15 @@ export const gameMachine = createMachine(
         ],
       },
       [s.no_match_found]: {
-        entry: [a.unflipCards],
+        after: [{ delay: 500, target: s.playing, actions: [a.unflipCards] }],
       },
       [s.match_found]: {
-        always: [{ target: s.won, cond: c.isGameWon }],
+        always: [
+          { target: s.won, cond: c.isGameWon },
+          {
+            target: s.playing,
+          },
+        ],
       },
       [s.won]: {
         type: "final",
@@ -92,11 +102,12 @@ export const gameMachine = createMachine(
       },
       [c.matchFound]: (context, event) => {
         console.log(c.matchFound, { context, event });
-        return false;
+        const isMatch = isMatchFound(context.board);
+        return isMatch;
       },
       [c.noMatchFound]: (context, event) => {
-        console.log(c.noMatchFound, { context, event });
-        return false;
+        const isMatch = isMatchFound(context.board);
+        return !isMatch;
       },
     },
     actions: {
@@ -112,14 +123,24 @@ export const gameMachine = createMachine(
         };
       }),
       [a.unflipCards]: assign((context, event) => {
-        console.log(a.unflipCards);
         const newBoard = dd(context.board);
         for (let row of newBoard) {
           for (let card of row) {
             if (!card.paired) card.flipped = false;
           }
         }
-        debugger;
+        return {
+          ...context,
+          board: newBoard,
+        };
+      }),
+      [a.createPair]: assign((context, event) => {
+        const newBoard = dd(context.board);
+        for (let row of newBoard) {
+          for (let card of row) {
+            if (card.flipped) card.paired = true;
+          }
+        }
         return {
           ...context,
           board: newBoard,
@@ -174,4 +195,10 @@ function chunkArray(array) {
 
 function dd(o) {
   return JSON.parse(JSON.stringify(o));
+}
+
+function isMatchFound(board) {
+  const flat = board.flat();
+  const [c1, c2] = flat.filter((c) => !c.paired).filter((c) => c.flipped);
+  return c1.value === c2.value;
 }

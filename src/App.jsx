@@ -1,9 +1,13 @@
 import { useMachine } from "@xstate/react";
 import "./App.css";
 import { gameMachine } from "./game/game";
+import { inspect } from "@xstate/inspect";
 
+inspect({
+  iframe: false,
+});
 function App() {
-  const [state, send] = useMachine(gameMachine);
+  const [state, send] = useMachine(gameMachine, { devTools: true });
   const { board } = state.context;
   console.log(state);
   return (
