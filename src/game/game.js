@@ -1,4 +1,5 @@
-import { assign, createMachine } from "xstate";
+import { assign, createMachine, actions } from "xstate";
+const { send } = actions;
 
 const StateHash = {
   not_started: "not_started",
@@ -13,6 +14,7 @@ const StateHash = {
 const EventsHash = {
   START_GAME: "START_GAME",
   FLIP_CARD: "FLIP_CARD",
+  UNFLIP_CARDS: "UNFLIP_CARDS",
 };
 
 const ConditionHash = {
@@ -23,6 +25,7 @@ const ConditionHash = {
 
 const ActionHash = {
   flipCard: "flipCard",
+  unflipCards: "unflipCards!!!!",
 };
 
 const s = StateHash,
@@ -57,6 +60,7 @@ export const gameMachine = createMachine(
         on: {
           [e.FLIP_CARD]: {
             target: s.two_cards_flipped,
+            actions: [a.flipCard],
           },
         },
       },
@@ -70,7 +74,7 @@ export const gameMachine = createMachine(
         ],
       },
       [s.no_match_found]: {
-        after: {},
+        entry: [a.unflipCards],
       },
       [s.match_found]: {
         always: [{ target: s.won, cond: c.isGameWon }],
@@ -107,6 +111,20 @@ export const gameMachine = createMachine(
           board: newBoard,
         };
       }),
+      [a.unflipCards]: assign((context, event) => {
+        console.log(a.unflipCards);
+        const newBoard = dd(context.board);
+        for (let row of newBoard) {
+          for (let card of row) {
+            if (!card.paired) card.flipped = false;
+          }
+        }
+        debugger;
+        return {
+          ...context,
+          board: newBoard,
+        };
+      }),
     },
   }
 );
@@ -127,7 +145,7 @@ function createInitialBoard() {
 
   const cards = chunkArray(
     shuffleArray([...items, ...items]).map((item, idx) => {
-      return { value: item, flipped: false };
+      return { value: item, flipped: false, paired: false };
     })
   );
 

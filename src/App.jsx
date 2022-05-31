@@ -5,6 +5,7 @@ import { gameMachine } from "./game/game";
 function App() {
   const [state, send] = useMachine(gameMachine);
   const { board } = state.context;
+  console.log(state);
   return (
     <div className="App">
       {board.map((row, rIdx) => {
