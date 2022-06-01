@@ -1,40 +1,14 @@
 import { assign, createMachine } from "xstate";
-
-const StateHash = {
-  not_started: "not_started",
-  playing: "playing",
-  one_card_flipped: "one_card_flipped",
-  two_cards_flipped: "two_cards_flipped",
-  no_match_found: "no_match_found",
-  match_found: "match_found",
-  won: "won",
-};
-
-const EventsHash = {
-  START_GAME: "START_GAME",
-  FLIP_CARD: "FLIP_CARD",
-  UNFLIP_CARDS: "UNFLIP_CARDS",
-  PLAY_AGAIN: "PLAY_AGAIN",
-};
-
-const ConditionHash = {
-  matchFound: "matchFound",
-  noMatchFound: "noMatchFound",
-  isGameWon: "isGameWon ",
-  isNotAlreadyFlipped: "isNotAlreadyFlipped",
-};
-
-const ActionHash = {
-  flipCard: "flipCard",
-  unflipCards: "unflipCards",
-  createPair: "createPair",
-  playAgain: "playAgain",
-};
-
-const s = StateHash,
-  e = EventsHash,
-  c = ConditionHash,
-  a = ActionHash;
+import {
+  s,
+  e,
+  a,
+  c,
+  dd,
+  createInitialBoard,
+  isMatchFound,
+  isGameOver,
+} from "./utils";
 
 export const gameMachine = createMachine(
   {
@@ -44,13 +18,6 @@ export const gameMachine = createMachine(
       board: createInitialBoard(),
     },
     states: {
-      [s.not_started]: {
-        on: {
-          [e.START_GAME]: {
-            target: s.playing,
-          },
-        },
-      },
       [s.playing]: {
         on: {
           [e.FLIP_CARD]: {
@@ -105,14 +72,14 @@ export const gameMachine = createMachine(
   },
   {
     guards: {
-      [c.isGameWon]: (context, event) => {
+      [c.isGameWon]: (context) => {
         return isGameOver(context.board);
       },
-      [c.matchFound]: (context, event) => {
+      [c.matchFound]: (context) => {
         const isMatch = isMatchFound(context.board);
         return isMatch;
       },
-      [c.noMatchFound]: (context, event) => {
+      [c.noMatchFound]: (context) => {
         const isMatch = isMatchFound(context.board);
         return !isMatch;
       },
@@ -134,7 +101,7 @@ export const gameMachine = createMachine(
           board: newBoard,
         };
       }),
-      [a.unflipCards]: assign((context, event) => {
+      [a.unflipCards]: assign((context) => {
         const newBoard = dd(context.board);
         for (let row of newBoard) {
           for (let card of row) {
@@ -146,7 +113,7 @@ export const gameMachine = createMachine(
           board: newBoard,
         };
       }),
-      [a.createPair]: assign((context, event) => {
+      [a.createPair]: assign((context) => {
         const newBoard = dd(context.board);
         for (let row of newBoard) {
           for (let card of row) {
@@ -158,68 +125,10 @@ export const gameMachine = createMachine(
           board: newBoard,
         };
       }),
-      [a.playAgain]: assign((context) => {
-        return {
-          ...context,
-          board: createInitialBoard(),
-        };
-      }),
+      [a.playAgain]: assign((context) => ({
+        ...context,
+        board: createInitialBoard(),
+      })),
     },
   }
 );
-
-function createInitialBoard() {
-  const items = [
-    "javascript",
-    "python",
-    "ruby",
-    "java",
-    "c++",
-    "haskell",
-    "kotlin",
-    "swift",
-  ];
-
-  const cards = chunkArray(
-    shuffleArray([...items, ...items]).map((item, idx) => {
-      return { value: item, flipped: false, paired: false };
-    })
-  );
-
-  return cards;
-}
-
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-function chunkArray(array) {
-  const output = [];
-  while (output.length < 4) {
-    const row = [];
-    while (row.length < 4) {
-      row.push(array.pop());
-    }
-    output.push(row);
-  }
-  return output;
-}
-
-function dd(o) {
-  return JSON.parse(JSON.stringify(o));
-}
-
-function isMatchFound(board) {
-  const flat = board.flat();
-  const [c1, c2] = flat.filter((c) => !c.paired).filter((c) => c.flipped);
-  return c1.value === c2.value;
-}
-
-function isGameOver(board) {
-  const flat = board.flat();
-  return flat.filter((c) => !c.paired).length === 0;
-}

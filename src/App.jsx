@@ -1,53 +1,47 @@
 import { useMachine } from "@xstate/react";
 import "./App.css";
 import { gameMachine } from "./game/game";
-import { inspect } from "@xstate/inspect";
+// import { inspect } from "@xstate/inspect";
 
-inspect({
-  iframe: false,
-});
+// inspect({
+//   iframe: false,
+// });
 function App() {
-  const [state, send] = useMachine(gameMachine, { devTools: true });
+  const [state, send] = useMachine(gameMachine /*, { devTools: true }*/);
   const { board } = state.context;
-  console.log(state);
   return (
     <div className="App">
       {board.map((row, rIdx) => {
         return (
           <div key={rIdx} className="row">
-            {row.map((c, cIdx) => (
-              <Card
+            {row.map(({ flipped, value }, cIdx) => (
+              <div
+                className="card"
+                onClick={() =>
+                  send({ type: "FLIP_CARD", payload: [rIdx, cIdx] })
+                }
                 key={rIdx + cIdx}
-                c={c}
-                onClick={() => {
-                  send({ type: "FLIP_CARD", payload: [rIdx, cIdx] });
-                }}
-              />
+              >
+                <div className={`card_inner ${flipped ? "is-flipped" : ""}`}>
+                  <div className="card_face card_back">
+                    <img src={`src/logos/${value}.svg`} className="logo" />
+                  </div>
+                  <div className="card_face card_front"></div>
+                </div>
+              </div>
             ))}
           </div>
         );
       })}
-      {state.value === "won" ? (
+      {state.value === "won" && (
         <section className="reset_button">
-          <button onClick={() => send("PLAY_AGAIN")}>play again</button>
+          <button onClick={() => send("PLAY_AGAIN")} className="button-22">
+            play again
+          </button>
         </section>
-      ) : null}
+      )}
     </div>
   );
 }
 
-function Card(props) {
-  const { c, onClick } = props;
-  return (
-    <div className="card" onClick={onClick}>
-      {/* {c.flipped && <img src={`src/logos/${c.value}.svg`} className="logo" />} */}
-      <div className={`card_inner ${c.flipped ? "is-flipped" : ""}`}>
-        <div className="card_face card_back">
-          <img src={`src/logos/${c.value}.svg`} className="logo" />
-        </div>
-        <div className="card_face card_front"></div>
-      </div>
-    </div>
-  );
-}
 export default App;
