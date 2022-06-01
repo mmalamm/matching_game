@@ -1,9 +1,8 @@
 import { useMachine } from "@xstate/react";
 import "./App.css";
 import { gameMachine } from "./game/game";
-// import { inspect } from "@xstate/inspect";
 import { images } from "./game/images";
-console.log(images);
+// import { inspect } from "@xstate/inspect";
 
 // inspect({
 //   iframe: false,
@@ -26,7 +25,7 @@ function App() {
               >
                 <div className={`card_inner ${flipped ? "is-flipped" : ""}`}>
                   <div className="card_face card_back">
-                    <img src={`src/logos/${value}.svg`} className="logo" />
+                    <img src={images[value]} className="logo" />
                   </div>
                   <div className="card_face card_front"></div>
                 </div>
