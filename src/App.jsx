@@ -33,7 +33,6 @@ function App() {
 
 function Card(props) {
   const { c, onClick } = props;
-  // console.log(c);
   return (
     <div className="card" onClick={onClick}>
       {c.flipped ? (

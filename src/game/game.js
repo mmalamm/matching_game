@@ -1,5 +1,4 @@
-import { assign, createMachine, actions } from "xstate";
-const { send } = actions;
+import { assign, createMachine } from "xstate";
 
 const StateHash = {
   not_started: "not_started",
@@ -97,11 +96,9 @@ export const gameMachine = createMachine(
   {
     guards: {
       [c.isGameWon]: (context, event) => {
-        console.log(c.isGameWon, { context, event });
-        return false;
+        return isGameOver(context.board);
       },
       [c.matchFound]: (context, event) => {
-        console.log(c.matchFound, { context, event });
         const isMatch = isMatchFound(context.board);
         return isMatch;
       },
@@ -201,4 +198,9 @@ function isMatchFound(board) {
   const flat = board.flat();
   const [c1, c2] = flat.filter((c) => !c.paired).filter((c) => c.flipped);
   return c1.value === c2.value;
+}
+
+function isGameOver(board) {
+  const flat = board.flat();
+  return flat.filter((c) => c.paired).length === 20;
 }
