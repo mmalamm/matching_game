@@ -36,7 +36,11 @@ function Card(props) {
   // console.log(c);
   return (
     <div className="card" onClick={onClick}>
-      {c.flipped ? c.value : "card"}
+      {c.flipped ? (
+        <img src={`src/logos/${c.value}.svg`} className="logo" />
+      ) : (
+        "card"
+      )}
     </div>
   );
 }

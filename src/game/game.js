@@ -157,11 +157,11 @@ function createInitialBoard() {
     "ruby",
     "java",
     "golang",
-    "rust",
+    "typescript",
     "c++",
     "haskell",
-    "scala",
-    "erlang",
+    "kotlin",
+    "swift",
   ];
 
   const cards = chunkArray(

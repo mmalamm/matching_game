@@ -24,3 +24,7 @@ html {
   cursor: pointer;
   user-select: none;
 }
+
+.logo {
+  height: 50px;
+}
