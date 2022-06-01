@@ -2,6 +2,8 @@ import { useMachine } from "@xstate/react";
 import "./App.css";
 import { gameMachine } from "./game/game";
 // import { inspect } from "@xstate/inspect";
+import { images } from "./game/images";
+console.log(images);
 
 // inspect({
 //   iframe: false,
