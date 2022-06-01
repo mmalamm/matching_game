@@ -14,6 +14,7 @@ const EventsHash = {
   START_GAME: "START_GAME",
   FLIP_CARD: "FLIP_CARD",
   UNFLIP_CARDS: "UNFLIP_CARDS",
+  PLAY_AGAIN: "PLAY_AGAIN",
 };
 
 const ConditionHash = {
@@ -26,6 +27,7 @@ const ActionHash = {
   flipCard: "flipCard",
   unflipCards: "unflipCards",
   createPair: "createPair",
+  playAgain: "playAgain",
 };
 
 const s = StateHash,
@@ -89,7 +91,12 @@ export const gameMachine = createMachine(
         ],
       },
       [s.won]: {
-        type: "final",
+        on: {
+          [e.PLAY_AGAIN]: {
+            target: s.playing,
+            actions: [a.playAgain],
+          },
+        },
       },
     },
   },
@@ -141,6 +148,12 @@ export const gameMachine = createMachine(
         return {
           ...context,
           board: newBoard,
+        };
+      }),
+      [a.playAgain]: assign((context) => {
+        return {
+          ...context,
+          board: createInitialBoard(),
         };
       }),
     },

@@ -27,6 +27,9 @@ function App() {
           </div>
         );
       })}
+      {state.value === "won" ? (
+        <button onClick={() => send("PLAY_AGAIN")}>play again</button>
+      ) : null}
     </div>
   );
 }
