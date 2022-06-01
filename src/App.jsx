@@ -28,7 +28,9 @@ function App() {
         );
       })}
       {state.value === "won" ? (
-        <button onClick={() => send("PLAY_AGAIN")}>play again</button>
+        <section className="reset_button">
+          <button onClick={() => send("PLAY_AGAIN")}>play again</button>
+        </section>
       ) : null}
     </div>
   );
@@ -38,11 +40,13 @@ function Card(props) {
   const { c, onClick } = props;
   return (
     <div className="card" onClick={onClick}>
-      {c.flipped ? (
-        <img src={`src/logos/${c.value}.svg`} className="logo" />
-      ) : (
-        "card"
-      )}
+      {/* {c.flipped && <img src={`src/logos/${c.value}.svg`} className="logo" />} */}
+      <div className={`card_inner ${c.flipped ? "is-flipped" : ""}`}>
+        <div className="card_face card_back">
+          <img src={`src/logos/${c.value}.svg`} className="logo" />
+        </div>
+        <div className="card_face card_front"></div>
+      </div>
     </div>
   );
 }

@@ -21,6 +21,7 @@ const ConditionHash = {
   matchFound: "matchFound",
   noMatchFound: "noMatchFound",
   isGameWon: "isGameWon ",
+  isNotAlreadyFlipped: "isNotAlreadyFlipped",
 };
 
 const ActionHash = {
@@ -55,6 +56,7 @@ export const gameMachine = createMachine(
           [e.FLIP_CARD]: {
             target: s.one_card_flipped,
             actions: [a.flipCard],
+            cond: c.isNotAlreadyFlipped,
           },
         },
       },
@@ -63,6 +65,7 @@ export const gameMachine = createMachine(
           [e.FLIP_CARD]: {
             target: s.two_cards_flipped,
             actions: [a.flipCard],
+            cond: c.isNotAlreadyFlipped,
           },
         },
       },
@@ -112,6 +115,11 @@ export const gameMachine = createMachine(
       [c.noMatchFound]: (context, event) => {
         const isMatch = isMatchFound(context.board);
         return !isMatch;
+      },
+      [c.isNotAlreadyFlipped]: (context, event) => {
+        const [rIdx, cIdx] = event.payload;
+        const isAlreadyFlipped = context.board[rIdx][cIdx].flipped;
+        return !isAlreadyFlipped;
       },
     },
     actions: {
@@ -166,8 +174,6 @@ function createInitialBoard() {
     "python",
     "ruby",
     "java",
-    "golang",
-    "typescript",
     "c++",
     "haskell",
     "kotlin",
@@ -195,7 +201,7 @@ function chunkArray(array) {
   const output = [];
   while (output.length < 4) {
     const row = [];
-    while (row.length < 5) {
+    while (row.length < 4) {
       row.push(array.pop());
     }
     output.push(row);
@@ -215,5 +221,5 @@ function isMatchFound(board) {
 
 function isGameOver(board) {
   const flat = board.flat();
-  return flat.filter((c) => c.paired).length === 20;
+  return flat.filter((c) => !c.paired).length === 0;
 }
